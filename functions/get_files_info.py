@@ -1,0 +1,46 @@
+import os
+
+def get_files_info(working_directory: str, directory: str = ".") -> str:
+	try:
+		filepath = os.path.abspath(working_directory)
+		fullpath = os.path.normpath(os.path.join(filepath, directory))
+		valid1 = os.path.commonpath([filepath, fullpath]) == filepath
+		valid2 = os.path.isdir(fullpath)
+		if valid1 is False:
+			return  f'  Error: Cannot list "{directory}" as it is outside the permitted working directory'
+		elif valid2 is False:
+			return f'  Error: "{directory}" is not a directory'
+		else:
+			try:
+				contents = os.listdir(fullpath)
+				things = []
+				for item in contents:
+					all = os.path.join(fullpath, item)
+					name = item
+					file_size = os.path.getsize(all)
+					is_dir = os.path.isdir(all)
+					things.append(f"  - {name}: file_size={file_size} bytes, is_dir={is_dir}")
+				result = "\n".join(things)
+				return result
+			except Exception as e:
+                		return f"Error encountered: {e}"
+
+	except Exception as e:
+		return f"Error encountered: {e}"
+	
+schema_get_files_info = {
+    "type": "function",
+    "function": {
+        "name": "get_files_info",
+        "description": "Lists the files present in the given directory",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "directory": {
+                    "type": "string",
+                    "description": "Directory path to list files from, relative to the working directory (default is the working directory itself)",
+                },
+            },
+        },
+    },
+}
